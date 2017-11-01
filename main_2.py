@@ -22,19 +22,19 @@ w=129;h=86;
 tr_input_image=np.load("/export/kim79/h2/finished_npy/7/tr_input_batch.npy")
 tr_output_state=np.load("/export/kim79/h2/finished_npy/7/tr_output_state_batch.npy")
 tr_output_lonlat=np.load("/export/kim79/h2/finished_npy/7/tr_output_lonlat_batch.npy")
+va_input_image=np.load("/export/kim79/h2/finished_npy/7/va_input_batch.npy")
+va_output_state=np.load("/export/kim79/h2/finished_npy/7/va_output_state_batch.npy")
+va_output_lonlat=np.load("/export/kim79/h2/finished_npy/7/va_output_lonlat_batchh.npy")
 te_input_image=np.load("/export/kim79/h2/finished_npy/7/te_input_batch.npy")
 te_output_state=np.load("/export/kim79/h2/finished_npy/7/te_output_state_batch.npy")
 te_output_lonlat=np.load("/export/kim79/h2/finished_npy/7/te_output_lonlat_batchh.npy")
 
 tr_output_lonlat=np.expand_dims(tr_output_lonlat,axis=3)
 te_output_lonlat=np.expand_dims(te_output_lonlat,axis=3)
+va_output_lonlat=np.expand_dims(va_output_lonlat,axis=3)
 
-
-print(np.shape(tr_input_image[0]))
-print(np.shape(tr_output_state[0]))
-print(np.shape(tr_output_lonlat[0]))
-display_step=10;
 # Training Parameters
+validation_step=10;
 learning_rate =0.0005
 training_steps =200000
 input_size =timesteps=4; 
@@ -90,7 +90,8 @@ train_op = optimizer.minimize(loss_op)
 
 #Evaluate Model
 mse=loss_lonlat;
-num_epoch=1000;
+num_epoch=100000;
+epsilon=0.00001;
 
 #Initialize the variables
 init = tf.global_variables_initializer()
@@ -98,19 +99,24 @@ init = tf.global_variables_initializer()
 with tf.Session() as sess:
     # Run the initializer
     sess.run(init)
-    for step in xrange(1, train_size*num_epoch):
-        print(step); test_i=0;
-        step_i=step%int(train_size);
-        batch_x, batch_y_state, batch_y_lonlat = tr_input_image[step_i], tr_output_state[step_i], tr_output_lonlat[step_i];       
-        fout_log.write(str(step)+"\n");
-        # Run optimization op (backprop)
-        sess.run(train_op, feed_dict={X: batch_x, Y_state: batch_y_state, Y_lonlat: batch_y_lonlat}) 
-        if step % display_step == 0 or step == 1:
-            # Calculate batch loss and accuracy
-            loss, mse_tr = sess.run([loss_op, mse], feed_dict={X: batch_x, Y_state: batch_y_state, Y_lonlat: batch_y_lonlat})
-            fout_log.write("Step " + str(step) + ", Minibatch Loss= " + \
-                  "{:.4f}".format(loss) + ", MSE= " + \
-                  "{:.3f}".format(mse_tr)+"\n")
+    delta=1;
+    while(delta>epsilon):
+        for step in range(train_size*num_epoch):
+            print(step,delta);
+            step_i=step%int(train_size);
+            batch_x, batch_y_state, batch_y_lonlat = tr_input_image[step_i], tr_output_state[step_i], tr_output_lonlat[step_i];       
+            fout_log.write(str(step)+"\n");
+            # Run optimization op (backprop)
+            sess.run(train_op, feed_dict={X: batch_x, Y_state: batch_y_state, Y_lonlat: batch_y_lonlat}) 
+            if step % validation_step == 0 :
+                # Calculate batch loss in validation set
+                ll=step%validation_step
+                loss= sess.run(mse, feed_dict={X: va_input_image[ll], Y_state:va_output_state[ll], Y_lonlat: va_output_lonlat[ll]})
+                if step > 0 : delta=validation_loss-float(loss);
+                fout_log.write("Step " + str(step) + ", Minibatch Loss= " + \
+                      "{:.4f}".format(loss) + \
+                      "{:.4f}".format(delta) + "\n")
+                validation_loss=float(loss);
     #After finishing training Write Test result as output npy files
     print("DONE and writing test data")
     #Load test data set one
