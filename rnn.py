@@ -3,19 +3,17 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 import tensorflow as tf
 from tensorflow.contrib import rnn
-from read_data import *
 from inference import *
 
-w=60; h=30;
+w=129; h=86;
 display_step=10;
 testing_step=100;
-learning_rate = 0.001
-training_steps = 100000
+training_steps = 200000
 input_size =timesteps=24;
 feature_size=w*h;
 # Network Parameters
-lstm_size=num_hidden = 100 # hidden layer num of features
-num_classes = 13 # Length of output
+lstm_size=num_hidden = 170 # hidden layer num of features
+num_classes = 1 # Length of output
 number_of_layers=1; #Start from only one layer
 
 
