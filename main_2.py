@@ -112,7 +112,7 @@ with tf.Session() as sess:
                 # Calculate batch loss in validation set
                 ll=step%validation_step
                 loss= sess.run(mse, feed_dict={X: va_input_image[ll], Y_state:va_output_state[ll], Y_lonlat: va_output_lonlat[ll]})
-                if step > 0 : delta=validation_loss-float(loss);
+                if step > 0 : delta=abs(validation_loss-float(loss));
                 fout_log.write("Step " + str(step) + ", Minibatch Loss= " + \
                       "{:.4f}".format(loss) + \
                       "{:.4f}".format(delta) + "\n")
