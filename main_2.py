@@ -91,7 +91,7 @@ train_op = optimizer.minimize(loss_op)
 #Evaluate Model
 mse=loss_lonlat;
 num_epoch=20000;
-epsilon=0.00001;
+epsilon=0.000001;
 
 #Initialize the variables
 init = tf.global_variables_initializer()
