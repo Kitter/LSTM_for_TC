@@ -16,7 +16,7 @@ fout_pres=open("pred_s.txt","w")
 fout_gt=open("gt.txt","w")
 fout_pre.write("\nPrediction \n"); fout_gt.write("\nGround Truth \n");
 # Import Input data : Takes long time
-train_size=250; test_size=50;
+train_size=2500; test_size=400; val_size=10;
 w=129;h=86; 
 #Before start please run "python read_data.py" to save input file#
 tr_input_image=np.load("/export/kim79/h2/finished_npy/7/tr_input_batch.npy")
@@ -111,7 +111,7 @@ with tf.Session() as sess:
         ll=step%validation_step
         if ll == 0 :
             print(step,delta,loss);
-            j=int(step/validation_step)
+            j=int(step/validation_step)%val_size
             # Calculate batch loss in validation set
             loss= sess.run(mse, feed_dict={X: va_input_image[j], Y_state:va_output_state[j], Y_lonlat: va_output_lonlat[j]})
             if j > 0 : delta=abs(validation_loss-float(loss));
