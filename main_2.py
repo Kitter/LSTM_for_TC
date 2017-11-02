@@ -90,7 +90,7 @@ train_op = optimizer.minimize(loss_op)
 
 #Evaluate Model
 mse=loss_lonlat;
-num_epoch=1000;
+num_epoch=20000;
 epsilon=0.00001;
 
 #Initialize the variables
