@@ -90,7 +90,7 @@ train_op = optimizer.minimize(loss_op)
 
 #Evaluate Model
 mse=loss_lonlat;
-num_epoch=100000;
+num_epoch=1000;
 epsilon=0.00001;
 
 #Initialize the variables
@@ -100,19 +100,21 @@ with tf.Session() as sess:
     # Run the initializer
     sess.run(init)
     delta=1;
-    step=1;
+    step=0;
+    loss=1;
     while(delta>epsilon and step<train_size*num_epoch):
-        print(step,delta);
         step_i=step%int(train_size);
         batch_x, batch_y_state, batch_y_lonlat = tr_input_image[step_i], tr_output_state[step_i], tr_output_lonlat[step_i];       
         fout_log.write(str(step)+"\n");
         # Run optimization op (backprop)
-        sess.run(train_op, feed_dict={X: batch_x, Y_state: batch_y_state, Y_lonlat: batch_y_lonlat}) 
-        if step % validation_step == 0 :
+        sess.run(train_op, feed_dict={X: batch_x, Y_state: batch_y_state, Y_lonlat: batch_y_lonlat})
+        ll=step%validation_step
+        if ll == 0 :
+            print(step,delta,loss);
+            j=int(step/validation_step)
             # Calculate batch loss in validation set
-            ll=step%validation_step
-            loss= sess.run(mse, feed_dict={X: va_input_image[ll], Y_state:va_output_state[ll], Y_lonlat: va_output_lonlat[ll]})
-            if step > 0 : delta=abs(validation_loss-float(loss));
+            loss= sess.run(mse, feed_dict={X: va_input_image[j], Y_state:va_output_state[j], Y_lonlat: va_output_lonlat[j]})
+            if j > 0 : delta=abs(validation_loss-float(loss));
             fout_log.write("Step " + str(step) + ", Minibatch Loss= " + \
                   "{:.4f}".format(loss) + \
                   "{:.4f}".format(delta) + "\n")
