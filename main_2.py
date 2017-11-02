@@ -37,7 +37,7 @@ va_output_lonlat=np.expand_dims(va_output_lonlat,axis=3)
 validation_step=10;
 learning_rate =0.0005
 training_steps =200000
-input_size =timesteps=4; 
+input_size =timesteps=24; 
 feature_size=w*h;
 channels=2;
 
