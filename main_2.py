@@ -100,23 +100,24 @@ with tf.Session() as sess:
     # Run the initializer
     sess.run(init)
     delta=1;
-    while(delta>epsilon):
-        for step in range(train_size*num_epoch):
-            print(step,delta);
-            step_i=step%int(train_size);
-            batch_x, batch_y_state, batch_y_lonlat = tr_input_image[step_i], tr_output_state[step_i], tr_output_lonlat[step_i];       
-            fout_log.write(str(step)+"\n");
-            # Run optimization op (backprop)
-            sess.run(train_op, feed_dict={X: batch_x, Y_state: batch_y_state, Y_lonlat: batch_y_lonlat}) 
-            if step % validation_step == 0 :
-                # Calculate batch loss in validation set
-                ll=step%validation_step
-                loss= sess.run(mse, feed_dict={X: va_input_image[ll], Y_state:va_output_state[ll], Y_lonlat: va_output_lonlat[ll]})
-                if step > 0 : delta=abs(validation_loss-float(loss));
-                fout_log.write("Step " + str(step) + ", Minibatch Loss= " + \
-                      "{:.4f}".format(loss) + \
-                      "{:.4f}".format(delta) + "\n")
-                validation_loss=float(loss);
+    step=1;
+    while(delta>epsilon and step<train_size*num_epoch):
+        print(step,delta);
+        step_i=step%int(train_size);
+        batch_x, batch_y_state, batch_y_lonlat = tr_input_image[step_i], tr_output_state[step_i], tr_output_lonlat[step_i];       
+        fout_log.write(str(step)+"\n");
+        # Run optimization op (backprop)
+        sess.run(train_op, feed_dict={X: batch_x, Y_state: batch_y_state, Y_lonlat: batch_y_lonlat}) 
+        if step % validation_step == 0 :
+            # Calculate batch loss in validation set
+            ll=step%validation_step
+            loss= sess.run(mse, feed_dict={X: va_input_image[ll], Y_state:va_output_state[ll], Y_lonlat: va_output_lonlat[ll]})
+            if step > 0 : delta=abs(validation_loss-float(loss));
+            fout_log.write("Step " + str(step) + ", Minibatch Loss= " + \
+                  "{:.4f}".format(loss) + \
+                  "{:.4f}".format(delta) + "\n")
+            validation_loss=float(loss);
+        step=step+1;
     #After finishing training Write Test result as output npy files
     print("DONE and writing test data")
     #Load test data set one
